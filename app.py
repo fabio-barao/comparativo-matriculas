@@ -1,55 +1,65 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+import io
 
 DB_NAME = "matriculas.db"
 
 def obter_dados():
-    """Obtém os registros do banco e retorna um DataFrame"""
+    """Obtém os registros do banco e retorna um DataFrame ordenado por data mais recente"""
     conn = sqlite3.connect(DB_NAME)
-    query = "SELECT * FROM matriculas ORDER BY DATA_CRIACAO DESC LIMIT 660"  # Pegamos os últimos 660 registros
+    query = "SELECT * FROM matriculas ORDER BY DATA_CRIACAO DESC"
     df = pd.read_sql(query, conn)
     conn.close()
     return df
 
+def separar_dias(df):
+    """Separa os registros do dia mais recente e do dia anterior"""
+    df["DATA_CRIACAO"] = pd.to_datetime(df["DATA_CRIACAO"])  # Converte para datetime
+    datas_unicas = sorted(df["DATA_CRIACAO"].unique(), reverse=True)  # Ordena do mais recente ao mais antigo
+
+    if len(datas_unicas) < 2:
+        return df[df["DATA_CRIACAO"] == datas_unicas[0]], pd.DataFrame(), datas_unicas[0], datas_unicas[0]
+
+    data_hoje = datas_unicas[0]
+    data_ontem = datas_unicas[1]
+
+    df_hoje = df[df["DATA_CRIACAO"] == data_hoje]
+    df_ontem = df[df["DATA_CRIACAO"] == data_ontem]
+
+    return df_hoje, df_ontem, data_ontem, data_hoje
+
 def comparar_dados(df_hoje, df_ontem):
     """Compara os dados de hoje e ontem e identifica mudanças"""
 
-    # Transformar os DataFrames em dicionários baseados no RA
-    dict_hoje = df_hoje.set_index("RA").to_dict("index")
-    dict_ontem = df_ontem.set_index("RA").to_dict("index")
+    df_hoje_filtrado = df_hoje.drop(columns=["DATA_CRIACAO"], errors="ignore")
+    df_ontem_filtrado = df_ontem.drop(columns=["DATA_CRIACAO"], errors="ignore")
 
-    # Registros adicionados (existem hoje, mas não existiam ontem)
+    dict_hoje = df_hoje_filtrado.set_index("RA").to_dict("index")
+    dict_ontem = df_ontem_filtrado.set_index("RA").to_dict("index")
+
     adicionados = [ra for ra in dict_hoje.keys() if ra not in dict_ontem]
-
-    # Registros removidos (existiam ontem, mas não existem hoje)
     removidos = [ra for ra in dict_ontem.keys() if ra not in dict_hoje]
-
-    # Registros alterados (existem nos dois dias, mas com diferenças)
-    alterados = []
-    for ra in dict_hoje.keys() & dict_ontem.keys():
-        if dict_hoje[ra] != dict_ontem[ra]:  # Compara os valores
-            alterados.append(ra)
+    alterados = [ra for ra in dict_hoje.keys() & dict_ontem.keys() if dict_hoje[ra] != dict_ontem[ra]]
 
     return adicionados, removidos, alterados
+
+def gerar_download(df, nome_arquivo):
+    """Cria um link de download para um DataFrame"""
+    buffer = io.BytesIO()
+    df.to_excel(buffer, index=False, engine='openpyxl')
+    buffer.seek(0)
+    return buffer
 
 # 🚀 Interface do Streamlit
 st.title("📊 Comparação de Matrículas Diário")
 
 df = obter_dados()
 
-# Ordenar por data para pegar os registros mais antigos como ontem e os mais recentes como hoje
-df = df.sort_values("DATA_CRIACAO", ascending=False)
+# Separa os registros de ontem e hoje corretamente
+df_hoje, df_ontem, data_ontem, data_hoje = separar_dias(df)
 
-# Separar os registros de ontem e hoje
-df_hoje = df.iloc[:330]  # Pegamos metade dos registros mais recentes como "hoje"
-df_ontem = df.iloc[330:]  # A outra metade como "ontem"
-
-# Pegando as datas mais recentes para exibir
-data_hoje = pd.to_datetime(df_hoje["DATA_CRIACAO"]).max().strftime("%d/%m/%Y")
-data_ontem = pd.to_datetime(df_ontem["DATA_CRIACAO"]).max().strftime("%d/%m/%Y")
-
-st.write(f"📆 Comparando dados de **{data_ontem}** com **{data_hoje}**")
+st.write(f"📆 Comparando dados de **{data_ontem.strftime('%d/%m/%Y')}** com **{data_hoje.strftime('%d/%m/%Y')}**")
 
 adicionados, removidos, alterados = comparar_dados(df_hoje, df_ontem)
 
@@ -76,15 +86,6 @@ else:
 
 # 📂 Botões para exportar cada categoria separadamente
 st.subheader("📂 Exportar Dados")
-
-# Função para gerar e baixar arquivos Excel
-def gerar_download(df, nome_arquivo):
-    """Cria um link de download para um DataFrame"""
-    import io
-    buffer = io.BytesIO()
-    df.to_excel(buffer, index=False, engine='openpyxl')
-    buffer.seek(0)
-    return buffer
 
 # Botão para baixar adicionados
 if not df_adicionados.empty:
