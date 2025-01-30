@@ -5,7 +5,9 @@ venv/
 .vscode/
 
 # Ignorar banco de dados SQLite (opcional, se não quiser versioná-lo)
-#*.db
+*.db
+!matriculas.db
+
 
 # Ignorar cache e arquivos temporários do Python
 __pycache__/
