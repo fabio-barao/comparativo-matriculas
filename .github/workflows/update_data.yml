@@ -29,9 +29,11 @@ jobs:
       run: python atualizar_dados.py
 
     - name: 📤 Commit e Enviar Banco Atualizado
+       env:
+        GH_TOKEN: ${{ secrets.GH_PAT }}
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions@github.com"
-        git add matriculas.db
-        git commit -m "🔄 Atualização diária do banco de dados - $(date +'%Y-%m-%d')"
-        git push
+        git add -f matriculas.db
+        git commit -m "🔄 Atualização diária do banco de dados - $(date +'%Y-%m-%d')" || echo "Nenhuma alteração para commit"
+        git push https://x-access-token:${GH_TOKEN}@github.com/fabio-barao/comparativo-matriculas.git main || echo "Nenhuma alteração para enviar"
