@@ -1,0 +1,34 @@
+name: Atualizar Banco de Dados
+
+on:
+  schedule:
+    - cron: "0 8 * * *"  # Executa todos os dias às 08:00 UTC
+  workflow_dispatch:  # Permite rodar manualmente se necessário
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Clonar o Repositório
+      uses: actions/checkout@v3
+
+    - name: 🐍 Configurar Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
+
+    - name: 📦 Instalar Dependências
+      run: |
+        pip install -r requirements.txt
+
+    - name: 🔄 Baixar e Atualizar os Dados
+      run: python atualizar_dados.py
+
+    - name: 📤 Commit e Enviar Banco Atualizado
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions@github.com"
+        git add matriculas.db
+        git commit -m "🔄 Atualização diária do banco de dados - $(date +'%Y-%m-%d')"
+        git push
