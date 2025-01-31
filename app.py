@@ -3,6 +3,36 @@ import sqlite3
 import pandas as pd
 import io
 
+# 🚀 Configuração de Login
+USER_CREDENTIALS = {
+    "vamille": "Xz9@Lm3#Pq7!Vk8$Tn5"  # Defina um usuário e senha aqui
+}
+
+def autenticar():
+    """Função para exibir a tela de login"""
+    st.sidebar.title("🔒 Login")
+    usuario = st.sidebar.text_input("Usuário", key="usuario")
+    senha = st.sidebar.text_input("Senha", type="password", key="senha")
+    botao_login = st.sidebar.button("Login")
+
+    if botao_login:
+        if usuario in USER_CREDENTIALS and USER_CREDENTIALS[usuario] == senha:
+            st.session_state["autenticado"] = True
+            st.session_state["usuario"] = usuario
+            st.sidebar.success(f"✅ Bem-vindo, {usuario}!")
+            st.experimental_rerun()
+        else:
+            st.sidebar.error("❌ Usuário ou senha incorretos!")
+
+# 🚀 Verifica se o usuário está autenticado
+if "autenticado" not in st.session_state:
+    st.session_state["autenticado"] = False
+
+if not st.session_state["autenticado"]:
+    autenticar()
+    st.stop()  # Para o Streamlit até que o usuário faça login
+
+# 💾 Conectar ao banco SQLite
 DB_NAME = "matriculas.db"
 
 def obter_dados():
@@ -15,8 +45,8 @@ def obter_dados():
 
 def separar_dias(df):
     """Separa os registros do dia mais recente e do dia anterior"""
-    df["DATA_CRIACAO"] = pd.to_datetime(df["DATA_CRIACAO"])  # Converte para datetime
-    datas_unicas = sorted(df["DATA_CRIACAO"].unique(), reverse=True)  # Ordena do mais recente ao mais antigo
+    df["DATA_CRIACAO"] = pd.to_datetime(df["DATA_CRIACAO"])  
+    datas_unicas = sorted(df["DATA_CRIACAO"].unique(), reverse=True)  
 
     if len(datas_unicas) < 2:
         return df[df["DATA_CRIACAO"] == datas_unicas[0]], pd.DataFrame(), datas_unicas[0], datas_unicas[0]
@@ -31,7 +61,6 @@ def separar_dias(df):
 
 def comparar_dados(df_hoje, df_ontem):
     """Compara os dados de hoje e ontem e identifica mudanças"""
-
     df_hoje_filtrado = df_hoje.drop(columns=["DATA_CRIACAO"], errors="ignore")
     df_ontem_filtrado = df_ontem.drop(columns=["DATA_CRIACAO"], errors="ignore")
 
@@ -44,19 +73,10 @@ def comparar_dados(df_hoje, df_ontem):
 
     return adicionados, removidos, alterados
 
-def gerar_download(df, nome_arquivo):
-    """Cria um link de download para um DataFrame"""
-    buffer = io.BytesIO()
-    df.to_excel(buffer, index=False, engine='openpyxl')
-    buffer.seek(0)
-    return buffer
-
 # 🚀 Interface do Streamlit
 st.title("📊 Comparação de Matrículas Diário")
 
 df = obter_dados()
-
-# Separa os registros de ontem e hoje corretamente
 df_hoje, df_ontem, data_ontem, data_hoje = separar_dias(df)
 
 st.write(f"📆 Comparando dados de **{data_ontem.strftime('%d/%m/%Y')}** com **{data_hoje.strftime('%d/%m/%Y')}**")
@@ -68,27 +88,17 @@ st.metric(label="📥 Registros Adicionados", value=len(adicionados))
 st.metric(label="📤 Registros Removidos", value=len(removidos))
 st.metric(label="✏️ Registros Alterados", value=len(alterados))
 
-# 📊 Criando tabelas para os dados
-st.subheader("📥 Registros Adicionados")
-df_adicionados = df_hoje[df_hoje["RA"].isin(adicionados)]
-st.dataframe(df_adicionados)
-
-st.subheader("📤 Registros Removidos")
-df_removidos = df_ontem[df_ontem["RA"].isin(removidos)]
-st.dataframe(df_removidos)
-
-st.subheader("✏️ Registros Alterados")
-df_alterados = df_hoje[df_hoje["RA"].isin(alterados)]
-if not df_alterados.empty:
-    st.dataframe(df_alterados)
-else:
-    st.write("✅ Nenhum registro alterado.")
-
-# 📂 Botões para exportar cada categoria separadamente
 st.subheader("📂 Exportar Dados")
 
+def gerar_download(df, nome_arquivo):
+    buffer = io.BytesIO()
+    df.to_excel(buffer, index=False, engine='openpyxl')
+    buffer.seek(0)
+    return buffer
+
 # Botão para baixar adicionados
-if not df_adicionados.empty:
+if len(adicionados) > 0:
+    df_adicionados = df_hoje[df_hoje["RA"].isin(adicionados)]
     st.download_button(
         label="📥 Baixar Registros Adicionados",
         data=gerar_download(df_adicionados, "adicionados.xlsx"),
@@ -97,7 +107,8 @@ if not df_adicionados.empty:
     )
 
 # Botão para baixar removidos
-if not df_removidos.empty:
+if len(removidos) > 0:
+    df_removidos = df_ontem[df_ontem["RA"].isin(removidos)]
     st.download_button(
         label="📤 Baixar Registros Removidos",
         data=gerar_download(df_removidos, "removidos.xlsx"),
@@ -106,7 +117,8 @@ if not df_removidos.empty:
     )
 
 # Botão para baixar alterados
-if not df_alterados.empty:
+if len(alterados) > 0:
+    df_alterados = df_hoje[df_hoje["RA"].isin(alterados)]
     st.download_button(
         label="✏️ Baixar Registros Alterados",
         data=gerar_download(df_alterados, "alterados.xlsx"),
