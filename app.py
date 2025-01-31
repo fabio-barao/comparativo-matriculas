@@ -2,10 +2,19 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import io
+import os
 
-# 🚀 Configuração de Login
+# 🚀 Definir diretório seguro para o banco de dados
+DB_DIR = os.path.join(os.getcwd(), ".db")  # Diretório oculto
+DB_NAME = os.path.join(DB_DIR, "matriculas.db")
+
+# Criar o diretório se não existir
+if not os.path.exists(DB_DIR):
+    os.makedirs(DB_DIR)
+
+# 🔐 Configuração de Login
 USER_CREDENTIALS = {
-    "vamille": "Xz9@Lm3#Pq7!Vk8$Tn5"  # Defina um usuário e senha aqui
+    "vamille": "Xz9@Lm3#Pq7!Vk8$Tn5"  # Alterar para a senha que você escolheu
 }
 
 def autenticar():
@@ -17,24 +26,19 @@ def autenticar():
 
     if botao_login:
         if usuario in USER_CREDENTIALS and USER_CREDENTIALS[usuario] == senha:
-            # ⚠️ Corrigindo o erro de sessão do Streamlit
             st.session_state["autenticado"] = True
-            st.experimental_set_query_params(usuario=usuario)  # Armazena de forma segura
+            st.experimental_set_query_params(usuario=usuario)  # Armazena o usuário de forma segura
             st.sidebar.success(f"✅ Bem-vindo, {usuario}!")
-            st.rerun()  # ⚠️ Força a página a recarregar corretamente
+            st.rerun()
         else:
             st.sidebar.error("❌ Usuário ou senha incorretos!")
 
-# 🚀 Verifica se o usuário está autenticado
 if "autenticado" not in st.session_state:
     st.session_state["autenticado"] = False
 
 if not st.session_state["autenticado"]:
     autenticar()
-    st.stop()  # Para o Streamlit até que o usuário faça login
-
-# 💾 Conectar ao banco SQLite
-DB_NAME = "matriculas.db"
+    st.stop()
 
 def obter_dados():
     """Obtém os registros do banco e retorna um DataFrame ordenado por data mais recente"""
@@ -74,7 +78,6 @@ def comparar_dados(df_hoje, df_ontem):
 
     return adicionados, removidos, alterados
 
-# 🚀 Interface do Streamlit
 st.title("📊 Comparação de Matrículas Diário")
 
 df = obter_dados()
@@ -84,7 +87,6 @@ st.write(f"📆 Comparando dados de **{data_ontem.strftime('%d/%m/%Y')}** com **
 
 adicionados, removidos, alterados = comparar_dados(df_hoje, df_ontem)
 
-# 📌 Exibir métricas
 st.metric(label="📥 Registros Adicionados", value=len(adicionados))
 st.metric(label="📤 Registros Removidos", value=len(removidos))
 st.metric(label="✏️ Registros Alterados", value=len(alterados))
@@ -97,32 +99,11 @@ def gerar_download(df, nome_arquivo):
     buffer.seek(0)
     return buffer
 
-# Botão para baixar adicionados
 if len(adicionados) > 0:
     df_adicionados = df_hoje[df_hoje["RA"].isin(adicionados)]
     st.download_button(
         label="📥 Baixar Registros Adicionados",
         data=gerar_download(df_adicionados, "adicionados.xlsx"),
         file_name="adicionados.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-# Botão para baixar removidos
-if len(removidos) > 0:
-    df_removidos = df_ontem[df_ontem["RA"].isin(removidos)]
-    st.download_button(
-        label="📤 Baixar Registros Removidos",
-        data=gerar_download(df_removidos, "removidos.xlsx"),
-        file_name="removidos.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-
-# Botão para baixar alterados
-if len(alterados) > 0:
-    df_alterados = df_hoje[df_hoje["RA"].isin(alterados)]
-    st.download_button(
-        label="✏️ Baixar Registros Alterados",
-        data=gerar_download(df_alterados, "alterados.xlsx"),
-        file_name="alterados.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
