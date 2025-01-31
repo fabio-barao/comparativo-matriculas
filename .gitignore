@@ -6,7 +6,7 @@ venv/
 
 # Ignorar banco de dados SQLite (opcional, se não quiser versioná-lo)
 *.db
-!matriculas.db
+#!matriculas.db
 
 
 # Ignorar cache e arquivos temporários do Python

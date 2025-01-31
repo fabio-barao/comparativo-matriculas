@@ -96,6 +96,19 @@ st.metric(label="📥 Registros Adicionados", value=len(adicionados))
 st.metric(label="📤 Registros Removidos", value=len(removidos))
 st.metric(label="✏️ Registros Alterados", value=len(alterados))
 
+# Exibir tabelas abaixo das métricas
+st.subheader("📥 Registros Adicionados")
+df_adicionados = df_hoje[df_hoje["RA"].isin(adicionados)]
+st.dataframe(df_adicionados)
+
+st.subheader("📤 Registros Removidos")
+df_removidos = df_ontem[df_ontem["RA"].isin(removidos)]
+st.dataframe(df_removidos)
+
+st.subheader("✏️ Registros Alterados")
+df_alterados = df_hoje[df_hoje["RA"].isin(alterados)]
+st.dataframe(df_alterados)
+
 st.subheader("📂 Exportar Dados")
 
 def gerar_download(df, nome_arquivo):
@@ -104,11 +117,26 @@ def gerar_download(df, nome_arquivo):
     buffer.seek(0)
     return buffer
 
-if len(adicionados) > 0:
-    df_adicionados = df_hoje[df_hoje["RA"].isin(adicionados)]
+if not df_adicionados.empty:
     st.download_button(
         label="📥 Baixar Registros Adicionados",
         data=gerar_download(df_adicionados, "adicionados.xlsx"),
         file_name="adicionados.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+if not df_removidos.empty:
+    st.download_button(
+        label="📤 Baixar Registros Removidos",
+        data=gerar_download(df_removidos, "removidos.xlsx"),
+        file_name="removidos.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+if not df_alterados.empty:
+    st.download_button(
+        label="✏️ Baixar Registros Alterados",
+        data=gerar_download(df_alterados, "alterados.xlsx"),
+        file_name="alterados.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
