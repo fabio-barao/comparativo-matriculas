@@ -41,7 +41,12 @@ if not st.session_state["autenticado"]:
     st.stop()
 
 def obter_dados():
-    """Obtém os registros do banco e retorna um DataFrame ordenado por data mais recente"""
+    """Verifica se o banco de dados existe antes de tentar acessá-lo"""
+    if not os.path.exists(DB_NAME):
+        st.error("❌ O banco de dados ainda não foi criado. Aguarde a primeira atualização!")
+        return pd.DataFrame()  # Retorna um DataFrame vazio para evitar erro
+
+    # Conecta ao banco e retorna os dados
     conn = sqlite3.connect(DB_NAME)
     query = "SELECT * FROM matriculas ORDER BY DATA_CRIACAO DESC"
     df = pd.read_sql(query, conn)
