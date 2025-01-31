@@ -44,7 +44,7 @@ def obter_dados():
     """Verifica se o banco de dados existe antes de tentar acessá-lo"""
     if not os.path.exists(DB_NAME):
         st.error("❌ O banco de dados ainda não foi criado. Aguarde a primeira atualização!")
-        return pd.DataFrame()  # Retorna um DataFrame vazio para evitar erro
+        return pd.DataFrame()
 
     # Conecta ao banco e retorna os dados
     conn = sqlite3.connect(DB_NAME)
@@ -55,8 +55,8 @@ def obter_dados():
 
 def separar_dias(df):
     """Separa os registros do dia mais recente e do dia anterior"""
-    df["DATA_CRIACAO"] = pd.to_datetime(df["DATA_CRIACAO"])  
-    datas_unicas = sorted(df["DATA_CRIACAO"].unique(), reverse=True)  
+    df["DATA_CRIACAO"] = pd.to_datetime(df["DATA_CRIACAO"])
+    datas_unicas = sorted(df["DATA_CRIACAO"].unique(), reverse=True)
 
     if len(datas_unicas) < 2:
         return df[df["DATA_CRIACAO"] == datas_unicas[0]], pd.DataFrame(), datas_unicas[0], datas_unicas[0]
