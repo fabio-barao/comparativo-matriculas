@@ -17,10 +17,11 @@ def autenticar():
 
     if botao_login:
         if usuario in USER_CREDENTIALS and USER_CREDENTIALS[usuario] == senha:
+            # ⚠️ Corrigindo o erro de sessão do Streamlit
             st.session_state["autenticado"] = True
-            st.session_state["usuario"] = usuario
+            st.experimental_set_query_params(usuario=usuario)  # Armazena de forma segura
             st.sidebar.success(f"✅ Bem-vindo, {usuario}!")
-            st.experimental_rerun()
+            st.rerun()  # ⚠️ Força a página a recarregar corretamente
         else:
             st.sidebar.error("❌ Usuário ou senha incorretos!")
 
