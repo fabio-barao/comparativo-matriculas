@@ -1,23 +1,15 @@
 import os
-import json
-import io
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
+from cryptography.fernet import Fernet
 
-# 📌 Caminho do arquivo de credenciais
+# 📌 Caminho dos arquivos
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 CREDENTIALS_FILE = os.path.join(CURRENT_DIR, "credentials.json")
-
-# 📌 Substitua pelo ID do arquivo do banco no Google Drive (pegue o ID no link do arquivo)
-FILE_ID = "1l9SbpjKF2HgmfgFmZJnNsYPJwHAZn3yS"
-
-# 📂 Diretório e caminho onde o banco será salvo
+CHAVE_FILE = os.path.join(CURRENT_DIR, "chave.key")
 DB_DIR = os.path.join(CURRENT_DIR, ".db")
+ENCRYPTED_DB_PATH = os.path.join(DB_DIR, "matriculas_encrypted.db")
 DB_PATH = os.path.join(DB_DIR, "matriculas.db")
-
-# 📂 Criar pasta `.db/` se não existir
-os.makedirs(DB_DIR, exist_ok=True)
 
 # 🔐 Autenticação com a conta de serviço
 credentials = service_account.Credentials.from_service_account_file(
@@ -28,19 +20,53 @@ credentials = service_account.Credentials.from_service_account_file(
 # 📡 Conectar à API do Google Drive
 service = build("drive", "v3", credentials=credentials)
 
-# ⬇️ Baixar o banco de dados do Google Drive
-print("Baixando banco de dados...")
-request = service.files().get_media(fileId=FILE_ID)
-fh = io.BytesIO()
-downloader = MediaIoBaseDownload(fh, request)
-done = False
+# 📌 Nome do arquivo criptografado no Google Drive
+FILE_NAME = "matriculas_encrypted.db"
 
-while not done:
-    status, done = downloader.next_chunk()
-    print(f"Progresso do download: {int(status.progress() * 100)}%")
+# 📌 Pasta no Google Drive (deixe vazio para salvar na raiz)
+FOLDER_ID = ""
 
-# 📂 Salvar o arquivo baixado
-with open(DB_PATH, "wb") as f:
-    f.write(fh.getvalue())
+# 🔍 Função para encontrar o arquivo no Drive
+def encontrar_arquivo(nome_arquivo):
+    query = f"name = '{nome_arquivo}'"
+    if FOLDER_ID:
+        query += f" and '{FOLDER_ID}' in parents"
 
-print(f"✅ Banco de dados baixado com sucesso: {DB_PATH}")
+    results = service.files().list(q=query, fields="files(id, name)").execute()
+    arquivos = results.get("files", [])
+    return arquivos[0]["id"] if arquivos else None
+
+# 🔓 Função para descriptografar o banco de dados
+def descriptografar_banco():
+    with open(CHAVE_FILE, "rb") as chave_file:
+        chave = chave_file.read()
+    
+    cipher = Fernet(chave)
+
+    with open(ENCRYPTED_DB_PATH, "rb") as banco_encriptado:
+        dados_encriptados = banco_encriptado.read()
+    
+    dados_descriptografados = cipher.decrypt(dados_encriptados)
+
+    with open(DB_PATH, "wb") as banco:
+        banco.write(dados_descriptografados)
+    
+    print("🔓 Banco de dados descriptografado com sucesso!")
+
+# 🔽 Baixar o banco de dados do Google Drive
+arquivo_id = encontrar_arquivo(FILE_NAME)
+
+if arquivo_id:
+    request = service.files().get_media(fileId=arquivo_id)
+    
+    # 🔽 Corrigindo o erro: agora o download acontece corretamente
+    with open(ENCRYPTED_DB_PATH, "wb") as banco_encriptado:
+        banco_encriptado.write(request.execute())
+    
+    print("✅ Banco criptografado baixado com sucesso!")
+
+    # 🔓 Descriptografar o banco após o download
+    descriptografar_banco()
+
+else:
+    print("❌ ERRO: O banco de dados criptografado não foi encontrado no Google Drive.")
