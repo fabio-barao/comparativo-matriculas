@@ -1,4 +1,5 @@
 import os
+import datetime
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
@@ -23,20 +24,41 @@ service = build("drive", "v3", credentials=credentials)
 # 📌 Nome do arquivo no Google Drive
 FILE_NAME = "matriculas.db"
 
-# 🔎 Verificar se o arquivo existe antes de fazer o upload
-if not os.path.exists(DB_PATH):
-    print(f"❌ ERRO: O arquivo {DB_PATH} não existe. Crie o banco de dados antes de fazer o upload.")
-    exit(1)
+# 📌 Pasta onde o banco será salvo (deixe vazio para salvar na raiz do Google Drive)
+FOLDER_ID = ""  # Se quiser salvar dentro de uma pasta, coloque o ID da pasta aqui.
 
-# 📤 Criar o metadado do arquivo no Drive
-file_metadata = {
-    "name": FILE_NAME
-}
+# 🔍 Função para encontrar o arquivo no Google Drive
+def encontrar_arquivo(nome_arquivo):
+    query = f"name = '{nome_arquivo}'"
+    if FOLDER_ID:
+        query += f" and '{FOLDER_ID}' in parents"
 
-# 📤 Fazer upload do arquivo para o Google Drive
+    results = service.files().list(q=query, fields="files(id, name)").execute()
+    arquivos = results.get("files", [])
+    return arquivos[0]["id"] if arquivos else None
+
+# 🔍 Verificar se o arquivo existe no Drive
+arquivo_atual_id = encontrar_arquivo(FILE_NAME)
+
+# 🔄 Se o banco já existe, renomeia para manter histórico
+if arquivo_atual_id:
+    data_atual = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    novo_nome = f"matriculas_{data_atual}.db"
+    
+    service.files().update(
+        fileId=arquivo_atual_id,
+        body={"name": novo_nome}
+    ).execute()
+    
+    print(f"🔄 Banco de dados renomeado para {novo_nome} para manter histórico.")
+
+# 📤 Criar novo upload do banco atualizado
+file_metadata = {"name": FILE_NAME}
+if FOLDER_ID:
+    file_metadata["parents"] = [FOLDER_ID]
+
 media = MediaFileUpload(DB_PATH, mimetype="application/octet-stream")
+
 file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
 
-# 📌 Exibir o ID do arquivo no Google Drive
-file_id = file.get("id")
-print(f"✅ Upload concluído! ID do arquivo: {file_id}")
+print(f"✅ Upload concluído! Novo banco de dados salvo com ID: {file.get('id')}")
