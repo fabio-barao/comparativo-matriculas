@@ -11,3 +11,7 @@ matriculas.db
 
 # Ignorar cache e arquivos temporários do Python
 __pycache__/
+
+
+# Ignorar credentials.json
+echo "credentials.json" >> .gitignore
