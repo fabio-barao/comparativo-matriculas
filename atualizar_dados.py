@@ -8,7 +8,7 @@ import os
 URL = "https://leaoapis.unileao.edu.br/crm_integration/matriculas_novatos_veteranos?token=1b3d5fbb-678c-4f1b-bf69-c262943a5065&periodo_letivo=20251"
 
 # 📂 Diretório seguro para o banco de dados
-DB_DIR = os.path.join(os.getcwd(), ".db")  # Pasta oculta
+DB_DIR = os.path.dirname(os.path.abspath(__file__))  # Diretório onde o script está salvo
 if not os.path.exists(DB_DIR):
     os.makedirs(DB_DIR)  # Criar diretório se não existir
 
