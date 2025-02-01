@@ -1,0 +1,31 @@
+name: Sync Database with Google Drive
+
+on:
+  schedule:
+    - cron: "0 8 * * *"  # Executa todos os dias às 08:00 UTC
+  workflow_dispatch:  # Permite rodar manualmente pelo GitHub Actions
+
+jobs:
+  sync-database:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔄 Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar o Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: 📦 Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: 🔐 Configurar credenciais do Google Drive
+        run: echo '${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}' > credentials.json
+
+      - name: ⬇️ Baixar o banco de dados atualizado
+        run: python download_db.py
+
+      - name: ⬆️ Fazer upload do banco de dados atualizado
+        run: python upload_db.py
