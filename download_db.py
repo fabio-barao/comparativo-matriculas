@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 CREDENTIALS_FILE = os.path.join(CURRENT_DIR, "credentials.json")
 CHAVE_FILE = os.path.join(CURRENT_DIR, "chave.key")
-DB_DIR = os.path.join(CURRENT_DIR, ".db")
+DB_DIR = os.path.join(CURRENT_DIR, ".db")  # Criado apenas quando necessário
 ENCRYPTED_DB_PATH = os.path.join(DB_DIR, "matriculas_encrypted.db")
 DB_PATH = os.path.join(DB_DIR, "matriculas.db")
 
@@ -57,9 +57,11 @@ def descriptografar_banco():
 arquivo_id = encontrar_arquivo(FILE_NAME)
 
 if arquivo_id:
+    # 🔽 Criar a pasta .db apenas se o arquivo for encontrado
+    os.makedirs(DB_DIR, exist_ok=True)
+
     request = service.files().get_media(fileId=arquivo_id)
     
-    # 🔽 Corrigindo o erro: agora o download acontece corretamente
     with open(ENCRYPTED_DB_PATH, "wb") as banco_encriptado:
         banco_encriptado.write(request.execute())
     
