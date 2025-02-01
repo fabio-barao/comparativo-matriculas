@@ -1,4 +1,4 @@
-name: Sync Database with Google Drive
+name: Sincronizar e Atualizar Banco de Dados
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # Permite rodar manualmente pelo GitHub Actions
 
 jobs:
-  sync-database:
+  sync-and-update-db:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,8 +24,14 @@ jobs:
       - name: 🔐 Configurar credenciais do Google Drive
         run: echo '${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}' > credentials.json
 
-      - name: ⬇️ Baixar o banco de dados atualizado
+      - name: 🔑 Criar chave.key a partir do Secret
+        run: echo "${{ secrets.CHAVE_KEY }}" > chave.key
+
+      - name: ⬇️ Baixar o banco de dados do Google Drive
         run: python download_db.py
 
-      - name: ⬆️ Fazer upload do banco de dados atualizado
+      - name: 🔄 Atualizar os dados no banco
+        run: python atualizar_dados.py
+
+      - name: ⬆️ Fazer upload do banco atualizado para o Google Drive
         run: python upload_db.py
