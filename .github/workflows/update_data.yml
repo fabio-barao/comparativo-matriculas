@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: 📥 Clonar o Repositório
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Garante que todas as alterações sejam puxadas
 
     - name: 🐍 Configurar Python
       uses: actions/setup-python@v3
@@ -19,11 +21,7 @@ jobs:
         python-version: "3.9"
 
     - name: 📦 Instalar Dependências
-      run: |
-        pip install -r requirements.txt
-
-    - name: 🏗️ Criar Banco de Dados e Tabela
-      run: python database.py
+      run: pip install -r requirements.txt
 
     - name: 🔄 Baixar e Atualizar os Dados
       run: python atualizar_dados.py
@@ -36,4 +34,5 @@ jobs:
         git config --global user.email "github-actions@github.com"
         git add -f matriculas.db
         git commit -m "🔄 Atualização diária do banco de dados - $(date +'%Y-%m-%d')" || echo "Nenhuma alteração para commit"
-        git push https://x-access-token:${GH_TOKEN}@github.com/fabio-barao/comparativo-matriculas.git main || echo "Nenhuma alteração para enviar"
+        git push https://x-access-token:${GH_TOKEN}@github.com/fabio-barao/comparativo-matriculas.git HEAD:main || echo "Nenhuma alteração para enviar"
+
