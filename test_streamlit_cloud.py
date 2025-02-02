@@ -30,8 +30,8 @@ if st.button("🔄 Rodar `download_db.py`"):
             check=True
         )
         st.success("✅ `download_db.py` foi executado com sucesso!")
-        st.text("📜 Saída do script:\n" + result.stdout)
+        st.text("📜 Saída do script (stdout):\n" + result.stdout)
     except subprocess.CalledProcessError as e:
         st.error("❌ Erro ao rodar `download_db.py`")
-        st.text("📜 Saída Padrão (stdout):\n" + e.stdout)
-        st.text("📜 Erro Completo (stderr):\n" + e.stderr)
+        st.text("📜 Saída Padrão (stdout):\n" + (e.stdout if e.stdout else "Nenhuma saída"))
+        st.text("📜 Erro Completo (stderr):\n" + (e.stderr if e.stderr else "Nenhuma saída"))
