@@ -19,11 +19,19 @@ else:
     st.error(f"❌ O banco `{DB_PATH}` NÃO foi encontrado no ambiente do Streamlit Cloud!")
 
 # 📡 Testar Download do Banco de Dados
-st.subheader("📡 Testar Download do Banco de Dados")
+st.subheader("📡 Testar Execução Manual do `download_db.py`")
 
-if st.button("📥 Baixar Banco do Google Drive"):
+if st.button("🔄 Rodar `download_db.py`"):
     try:
-        subprocess.run(["python", "download_db.py"], check=True)
-        st.success("✅ Banco de dados baixado com sucesso!")
+        result = subprocess.run(
+            ["python", "download_db.py"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        st.success("✅ `download_db.py` foi executado com sucesso!")
+        st.text("📜 Saída do script:\n" + result.stdout)
     except subprocess.CalledProcessError as e:
-        st.error(f"❌ Erro ao baixar o banco: {e}")
+        st.error("❌ Erro ao rodar `download_db.py`")
+        st.text("📜 Saída Padrão (stdout):\n" + e.stdout)
+        st.text("📜 Erro Completo (stderr):\n" + e.stderr)
