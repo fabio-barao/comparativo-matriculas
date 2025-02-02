@@ -1,3 +1,22 @@
+import streamlit as st
+import json
+
+st.write("🔍 Teste de Credenciais - Streamlit Secrets")
+
+# Verificar se o Streamlit está acessando as credenciais corretamente
+try:
+    credentials_info = st.secrets["GOOGLE_DRIVE_CREDENTIALS"]
+    st.write("✅ Streamlit conseguiu acessar as credenciais!")
+    st.write("🔑 Primeiras 100 caracteres das credenciais:")
+    st.write(json.dumps(credentials_info)[:100])  # Mostrar apenas um trecho por segurança
+except Exception as e:
+    st.write("❌ Erro ao acessar as credenciais no Streamlit Secrets:")
+    st.write(str(e))
+
+
+
+
+
 import os
 import streamlit as st
 from google.oauth2 import service_account
