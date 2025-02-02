@@ -4,14 +4,25 @@ import pandas as pd
 import io
 import os
 import hashlib
+import subprocess
 
 # 🚀 Configuração do diretório seguro para o banco de dados
-DB_DIR = os.path.join(os.getcwd(), ".db")  # Diretório oculto
+DB_DIR = os.path.join(os.getcwd(), ".db")  # Diretório onde o banco será salvo
 DB_NAME = os.path.join(DB_DIR, "matriculas.db")
 
 # Criar o diretório se não existir
 if not os.path.exists(DB_DIR):
     os.makedirs(DB_DIR)
+
+# 🔄 Função para garantir que o banco de dados esteja disponível
+def verificar_e_baixar_banco():
+    if not os.path.exists(DB_NAME):
+        st.warning("📡 Banco de dados não encontrado. Baixando do Google Drive...")
+        try:
+            subprocess.run(["python", "download_db.py"], check=True)
+            st.success("✅ Banco de dados baixado e pronto para uso!")
+        except subprocess.CalledProcessError:
+            st.error("❌ Erro ao baixar o banco de dados. Tente novamente mais tarde.")
 
 # 🔒 Configuração de Login com Hash
 USER_CREDENTIALS = {
@@ -40,6 +51,9 @@ if "autenticado" not in st.session_state:
 if not st.session_state["autenticado"]:
     autenticar()
     st.stop()
+
+# 🔄 Verificar se o banco existe e baixá-lo caso necessário
+verificar_e_baixar_banco()
 
 def obter_dados():
     """Obtém os dados do banco de dados SQLite."""

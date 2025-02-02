@@ -26,7 +26,7 @@ service = build("drive", "v3", credentials=credentials)
 FILE_NAME = "matriculas_encrypted.db"
 
 # 📌 Pasta no Google Drive (deixe vazio para salvar na raiz)
-FOLDER_ID = ""
+FOLDER_ID = "1gqTrWM72i44so_VXWXoLzG-xOdpoE7Rq"
 
 # 🔍 Função para encontrar o arquivo no Drive
 def encontrar_arquivo(nome_arquivo):
