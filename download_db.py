@@ -12,7 +12,7 @@ try:
     if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
         st.write("✅ A chave 'GOOGLE_DRIVE_CREDENTIALS' foi encontrada no Streamlit Secrets.")
         
-        credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])
+        credentials_info = st.secrets["GOOGLE_DRIVE_CREDENTIALS"]
 
         # Validar estrutura das credenciais
         campos_obrigatorios = ["type", "project_id", "private_key", "client_email", "token_uri"]
