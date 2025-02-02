@@ -1,7 +1,6 @@
 import streamlit as st
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-import json
 
 st.title("🔍 Teste de Autenticação no Google Drive")
 
@@ -10,7 +9,8 @@ try:
     if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
         st.success("✅ A chave 'GOOGLE_DRIVE_CREDENTIALS' foi encontrada no Streamlit Secrets.")
 
-        credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])
+        # ❌ REMOVA json.loads() E USE DIRETAMENTE st.secrets
+        credentials_info = st.secrets["GOOGLE_DRIVE_CREDENTIALS"]
         
         # 🔐 Tentar autenticar
         credentials = service_account.Credentials.from_service_account_info(
