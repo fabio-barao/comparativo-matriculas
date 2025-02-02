@@ -6,6 +6,8 @@ import os
 import hashlib
 import subprocess
 
+import test_secrets
+
 # 🚀 Configuração do diretório seguro para o banco de dados
 DB_DIR = os.path.join(os.getcwd(), ".db")  # Diretório onde o banco será salvo
 DB_NAME = os.path.join(DB_DIR, "matriculas.db")
