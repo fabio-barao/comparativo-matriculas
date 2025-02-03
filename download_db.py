@@ -21,6 +21,13 @@ except Exception as e:
     log(f"❌ Erro ao listar arquivos no diretório: {e}")
     log(traceback.format_exc())
 
+# 📌 Caminhos dos arquivos
+CURRENT_DIR = os.getcwd()
+CHAVE_FILE = os.path.join(CURRENT_DIR, "chave.key")
+DB_DIR = os.path.join(CURRENT_DIR, ".db")
+ENCRYPTED_DB_PATH = os.path.join(DB_DIR, "matriculas_encrypted.db")
+DB_PATH = os.path.join(DB_DIR, "matriculas.db")  # <-- ADICIONADO AQUI
+
 # 🚀 Carregar credenciais do Google Drive corretamente
 try:
     import streamlit as st
@@ -45,8 +52,6 @@ except Exception as e:
     log(f"❌ Erro ao carregar credenciais: {e}")
     log(traceback.format_exc())
     sys.exit(1)
-
-
 
 # 🔐 Autenticação no Google Drive
 try:
@@ -83,37 +88,18 @@ except Exception as e:
 # 🔽 Baixar o banco de dados
 try:
     log("📥 Iniciando download do banco de dados...")
-    DB_DIR = os.path.join(os.getcwd(), ".db")
     os.makedirs(DB_DIR, exist_ok=True)
-
-    ENCRYPTED_DB_PATH = os.path.join(DB_DIR, "matriculas_encrypted.db")
 
     request = service.files().get_media(fileId=arquivo_id)
 
     with open(ENCRYPTED_DB_PATH, "wb") as banco_encriptado:
         banco_encriptado.write(request.execute())
 
-    log("✅ Banco criptografado baixado com sucesso!")
+    log(f"✅ Banco criptografado baixado com sucesso e salvo em {ENCRYPTED_DB_PATH}")
+
 except Exception as e:
     log(f"❌ Erro ao baixar o banco de dados: {e}")
     log(traceback.format_exc())
     sys.exit(1)
 
 log("✅ `download_db.py` finalizado com sucesso!")
-
-
-log("📂 Verificando se o banco foi baixado e salvo corretamente...")
-
-# 📌 Verificar se o arquivo criptografado foi salvo corretamente
-if os.path.exists(ENCRYPTED_DB_PATH):
-    log(f"✅ Banco criptografado salvo em: {ENCRYPTED_DB_PATH}")
-    log(f"📏 Tamanho do arquivo criptografado: {os.path.getsize(ENCRYPTED_DB_PATH)} bytes")
-else:
-    log(f"❌ Erro: O arquivo {ENCRYPTED_DB_PATH} NÃO foi salvo corretamente!")
-
-# 📌 Verificar se o arquivo descriptografado foi salvo corretamente
-if os.path.exists(DB_PATH):
-    log(f"✅ Banco descriptografado salvo em: {DB_PATH}")
-    log(f"📏 Tamanho do arquivo descriptografado: {os.path.getsize(DB_PATH)} bytes")
-else:
-    log(f"❌ Erro: O arquivo {DB_PATH} NÃO foi salvo corretamente!")
