@@ -1,7 +1,20 @@
-import os
 import subprocess
 import streamlit as st
 
+if st.button("⚙️ Instalar Dependências"):
+    try:
+        result = subprocess.run(["python", "install_requirements.py"], capture_output=True, text=True, check=True)
+        st.write("✅ Dependências instaladas com sucesso!")
+        st.text("📜 Saída do script:\n" + result.stdout)
+    except subprocess.CalledProcessError as e:
+        st.error("❌ Erro ao instalar dependências")
+        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
+
+
+
+
+
+import os
 
 st.write("📂 Diretório de trabalho:", os.getcwd())
 st.write("📁 Arquivos no diretório:", os.listdir("."))
