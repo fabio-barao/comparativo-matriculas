@@ -1,5 +1,6 @@
 name: Sincronizar e Atualizar Banco de Dados
 
+
 on:
   schedule:
     - cron: "0 8 * * *"  # Executa todos os dias às 08:00 UTC
