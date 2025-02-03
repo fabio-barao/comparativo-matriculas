@@ -11,8 +11,16 @@ if st.button("⚙️ Instalar Dependências"):
         st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
 
 
+st.write("## 🔍 Diagnóstico do Banco de Dados")
 
-
+if st.button("🔄 Rodar download_db.py manualmente"):
+    try:
+        result = subprocess.run(["python", "download_db.py"], capture_output=True, text=True, check=True)
+        st.write("✅ Banco de dados baixado com sucesso!")
+        st.text("📜 Saída do script:\n" + result.stdout)
+    except subprocess.CalledProcessError as e:
+        st.error("❌ Erro ao rodar download_db.py")
+        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
 
 import os
 
