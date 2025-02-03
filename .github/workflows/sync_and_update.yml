@@ -27,8 +27,13 @@ jobs:
         run: |
           echo "${GOOGLE_DRIVE_CREDENTIALS}" | jq '.' > credentials.json
 
+          # 🔹 Restaurando quebras de linha na private_key dentro do credentials.json
+          sed -i 's/-----BEGIN PRIVATE KEY-----/-----BEGIN PRIVATE KEY-----\n/g' credentials.json
+          sed -i 's/-----END PRIVATE KEY-----/-----END PRIVATE KEY-----\n/g' credentials.json
+          sed -i 's/\\n/\n/g' credentials.json
+
           if [ -z "$(cat credentials.json)" ]; then
-            echo "❌ ERRO: O arquivo credentials.json está vazio ou corrompido!"
+            echo "❌ ERRO: O arquivo credentials.json está vazio!"
             exit 1
           else
             echo "✅ GOOGLE_DRIVE_CREDENTIALS carregado e salvo corretamente!"

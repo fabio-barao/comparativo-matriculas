@@ -1,10 +1,9 @@
-import os
 import json
+import os
 import sys
 import traceback
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from cryptography.fernet import Fernet
 
 def log(mensagem):
     """Escreve logs no terminal"""
@@ -12,7 +11,6 @@ def log(mensagem):
 
 log("🚀 Iniciando download_db.py...")
 
-# Verificar se o arquivo credentials.json existe e tem conteúdo
 CREDENTIALS_PATH = "credentials.json"
 
 if not os.path.exists(CREDENTIALS_PATH):
@@ -26,7 +24,11 @@ try:
     if not credentials_info:
         log("❌ ERRO: O arquivo credentials.json está vazio ou corrompido!")
         sys.exit(1)
-        
+
+    # 🔹 Restaurando quebras de linha na private_key
+    if "private_key" in credentials_info:
+        credentials_info["private_key"] = credentials_info["private_key"].replace(" ", "\n")
+
     log("✅ Credenciais carregadas com sucesso do arquivo JSON.")
 
 except Exception as e:
