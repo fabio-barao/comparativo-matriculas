@@ -1,3 +1,20 @@
+import os
+import streamlit as st
+
+st.write("📂 Diretório onde os bancos devem estar:", os.path.join(os.getcwd(), ".db"))
+
+if os.path.exists(os.path.join(os.getcwd(), ".db")):
+    arquivos_db = os.listdir(os.path.join(os.getcwd(), ".db"))
+    st.write("📁 Arquivos na pasta .db:", arquivos_db)
+else:
+    st.write("❌ Diretório .db não encontrado!")
+
+
+
+
+
+
+
 import streamlit as st
 import sqlite3
 import pandas as pd
