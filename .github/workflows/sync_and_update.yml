@@ -22,19 +22,27 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: 🔐 Configurar credenciais do Google Drive
+        env:
+          GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
         run: |
-              echo "${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}" | sed 's/\\n/\n/g' > credentials.json
+          if [ -z "$GOOGLE_DRIVE_CREDENTIALS" ]; then
+            echo "❌ ERRO: GOOGLE_DRIVE_CREDENTIALS não está definido no ambiente!"
+            exit 1
+          else
+            echo "$GOOGLE_DRIVE_CREDENTIALS" | sed 's/\\n/\n/g' > credentials.json
+            echo "✅ GOOGLE_DRIVE_CREDENTIALS carregado e salvo!"
+          fi
 
       - name: 🔑 Criar chave.key a partir do Secret
         run: echo "${{ secrets.CHAVE_KEY }}" > chave.key
 
       - name: 🔍 Verificar se GOOGLE_DRIVE_CREDENTIALS está carregado
         run: |
-          if [ -z "$GOOGLE_DRIVE_CREDENTIALS" ]; then
-            echo "❌ ERRO: GOOGLE_DRIVE_CREDENTIALS não está carregado corretamente!"
+          if [ -z "$(cat credentials.json)" ]; then
+            echo "❌ ERRO: O arquivo credentials.json está vazio!"
             exit 1
           else
-            echo "✅ GOOGLE_DRIVE_CREDENTIALS foi carregado com sucesso!"
+            echo "✅ O arquivo credentials.json foi criado corretamente!"
           fi
 
       - name: ⬇️ Baixar o banco de dados do Google Drive
