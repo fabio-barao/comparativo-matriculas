@@ -23,12 +23,12 @@ except Exception as e:
     log(f"❌ Erro ao listar arquivos no diretório: {e}")
     log(traceback.format_exc())
 
-# 🚀 Carregar credenciais do Google Drive
+# 🚀 Carregar credenciais do Google Drive corretamente
 try:
-    if "streamlit" in sys.modules:
+    if "GOOGLE_DRIVE_CREDENTIALS" in os.environ or "streamlit" in sys.modules:
         import streamlit as st
         log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
-        credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])
+        credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])  # Garante que é um dicionário
     else:
         log("🖥️ Rodando no terminal, carregando credenciais do arquivo JSON")
         with open("credentials.json") as f:
