@@ -1,26 +1,3 @@
-import os
-import streamlit as st
-
-DB_DIR = os.path.join(os.getcwd(), ".db")
-DB_NAME = os.path.join(DB_DIR, "matriculas.db")
-
-# 📂 Criar a pasta, se não existir
-if not os.path.exists(DB_DIR):
-    os.makedirs(DB_DIR, exist_ok=True)
-
-# 📂 Teste de diretório
-st.write("📂 Diretório onde os bancos devem estar:", DB_DIR)
-
-if os.path.exists(DB_DIR):
-    arquivos_db = os.listdir(DB_DIR)
-    st.write("📁 Arquivos na pasta .db:", arquivos_db)
-else:
-    st.write("❌ Diretório .db ainda NÃO foi criado!")
-
-
-
-
-
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -42,10 +19,17 @@ def verificar_e_baixar_banco():
     if not os.path.exists(DB_NAME):
         st.warning("📡 Banco de dados não encontrado. Baixando do Google Drive...")
         try:
-            subprocess.run(["python", "download_db.py"], check=True)
-            st.success("✅ Banco de dados baixado e pronto para uso!")
-        except subprocess.CalledProcessError:
-            st.error("❌ Erro ao baixar o banco de dados. Tente novamente mais tarde.")
+            result = subprocess.run(["python", "download_db.py"], capture_output=True, text=True, check=True)
+            st.write("📜 Saída do script:")
+            st.text(result.stdout if result.stdout else "⚠️ Nenhuma saída padrão")
+
+            if os.path.exists(DB_NAME):
+                st.success("✅ Banco de dados baixado e pronto para uso!")
+            else:
+                st.error("❌ Banco não foi encontrado após o download.")
+        except subprocess.CalledProcessError as e:
+            st.error("❌ Erro ao baixar o banco de dados.")
+            st.text(e.stderr if e.stderr else "Nenhuma saída de erro")
 
 # 🔒 Configuração de Login com Hash
 USER_CREDENTIALS = {
@@ -147,41 +131,6 @@ st.markdown("""
     <h1 style='text-align: center;'>📊 Comparação de Matrículas Diário</h1>
 """, unsafe_allow_html=True)
 
-
-import sqlite3
-
-st.write("🔍 Diagnóstico do Banco de Dados no Streamlit Cloud")
-
-# 📌 Verificar se o arquivo do banco existe
-if os.path.exists(DB_NAME):
-    st.success(f"✅ Banco de dados encontrado: {DB_NAME}")
-
-    conn = sqlite3.connect(DB_NAME)
-
-    # 📌 Listar tabelas no banco
-    tabelas = pd.read_sql("SELECT name FROM sqlite_master WHERE type='table';", conn)
-    st.write("📋 Tabelas no Banco de Dados:", tabelas)
-
-    # 📌 Verificar se há registros na tabela 'matriculas'
-    try:
-        df_teste = pd.read_sql("SELECT * FROM matriculas LIMIT 5;", conn)
-        st.write("📊 Registros na Tabela 'matriculas':", df_teste.shape[0])
-        st.write("📊 Amostra de Dados:", df_teste)
-    except Exception as e:
-        st.write(f"❌ Erro ao acessar a tabela 'matriculas': {e}")
-
-    conn.close()
-else:
-    st.error("❌ O arquivo do banco de dados não foi encontrado no ambiente do Streamlit Cloud!")
-
-
-
-
-
-
-
-
-
 df = obter_dados()
 
 if df.empty:
@@ -207,16 +156,3 @@ adicionados, removidos, alterados = comparar_dados(df_hoje, df_ontem)
 st.metric(label="📥 Registros Adicionados", value=len(adicionados))
 st.metric(label="📤 Registros Removidos", value=len(removidos))
 st.metric(label="✏️ Registros Alterados", value=len(alterados))
-
-st.subheader("📥 Registros Adicionados")
-st.dataframe(df_hoje[df_hoje["RA"].isin(adicionados)])
-
-st.subheader("📤 Registros Removidos")
-st.dataframe(df_ontem[df_ontem["RA"].isin(removidos)])
-
-st.subheader("✏️ Registros Alterados")
-st.dataframe(df_hoje[df_hoje["RA"].isin(alterados)])
-
-st.subheader("📂 Exportar Dados")
-if not df_hoje[df_hoje["RA"].isin(adicionados)].empty:
-    st.download_button("📥 Baixar Registros Adicionados", data=gerar_download(df_hoje[df_hoje["RA"].isin(adicionados)], "adicionados.xlsx"), file_name="adicionados.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
