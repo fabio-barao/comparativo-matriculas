@@ -6,13 +6,10 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from cryptography.fernet import Fernet
 
+# 📢 Função de Log Simples (sem Streamlit)
 def log(mensagem):
-    """Escreve logs na tela, usando Streamlit se disponível."""
-    if "streamlit" in sys.modules:
-        import streamlit as st
-        st.write(mensagem)
-    else:
-        print(mensagem)
+    """Escreve logs diretamente no terminal"""
+    print(mensagem)
 
 log("🚀 Iniciando download_db.py...")
 
@@ -26,10 +23,9 @@ except Exception as e:
 
 # 🚀 Carregar credenciais do Google Drive corretamente
 try:
-    import streamlit as st
-    if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
+    if "GOOGLE_DRIVE_CREDENTIALS" in os.environ:
         log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
-        credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])  # Garante que é um dicionário
+        credentials_info = json.loads(os.environ["GOOGLE_DRIVE_CREDENTIALS"])
     else:
         log("🖥️ Rodando no terminal, carregando credenciais do arquivo JSON")
         if not os.path.exists("credentials.json"):
