@@ -1,56 +1,3 @@
-import subprocess
-import streamlit as st
-
-if st.button("⚙️ Instalar Dependências"):
-    try:
-        result = subprocess.run(["python", "install_requirements.py"], capture_output=True, text=True, check=True)
-        st.write("✅ Dependências instaladas com sucesso!")
-        st.text("📜 Saída do script:\n" + result.stdout)
-    except subprocess.CalledProcessError as e:
-        st.error("❌ Erro ao instalar dependências")
-        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
-
-
-import os
-
-st.write("## 🔍 Diagnóstico do Banco de Dados")
-
-# 📂 Listar arquivos no diretório antes de rodar o script
-if st.button("📂 Verificar Arquivos no Streamlit Cloud"):
-    arquivos = os.listdir(".")
-    st.write("📁 Arquivos no Diretório:", arquivos)
-
-# 🔄 Rodar o script manualmente e capturar a saída
-if st.button("🔄 Rodar download_db.py manualmente"):
-    try:
-        st.write("📢 Tentando rodar `download_db.py`...")
-        
-        # Executar e capturar saída e erro completo
-        result = subprocess.run(
-            ["python", "download_db.py"], 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE, 
-            text=True
-        )
-
-        st.write("📜 Saída do script:")
-        st.text(result.stdout if result.stdout else "⚠️ Nenhuma saída padrão")
-
-        st.write("📜 Erro do script:")
-        st.text(result.stderr if result.stderr else "✅ Nenhum erro detectado")
-
-    except Exception as e:
-        st.error(f"❌ Erro inesperado ao rodar download_db.py: {e}")
-
-
-
-
-
-
-
-
-
-
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -60,7 +7,7 @@ import hashlib
 import subprocess
 
 # 🚀 Configuração do diretório seguro para o banco de dados
-DB_DIR = os.path.join(os.getcwd(), ".db")  # Diretório onde o banco será salvo
+DB_DIR = os.path.join(os.getcwd(), ".db")
 DB_NAME = os.path.join(DB_DIR, "matriculas.db")
 
 # Criar o diretório se não existir
@@ -109,20 +56,39 @@ if not st.session_state["autenticado"]:
 verificar_e_baixar_banco()
 
 def obter_dados():
-    """Obtém os dados do banco de dados SQLite."""
+    """Obtém os dados do banco de dados SQLite e verifica a existência da tabela e coluna."""
     if not os.path.exists(DB_NAME):
         st.error("❌ O banco de dados ainda não foi criado. Aguarde a primeira atualização!")
         return pd.DataFrame()
 
     conn = sqlite3.connect(DB_NAME)
+
+    # 📌 Verificar se a tabela existe
+    query_check_table = "SELECT name FROM sqlite_master WHERE type='table' AND name='matriculas';"
+    tabela_existe = pd.read_sql(query_check_table, conn)
+
+    if tabela_existe.empty:
+        st.error("❌ A tabela 'matriculas' não foi encontrada no banco de dados!")
+        conn.close()
+        return pd.DataFrame()
+
+    # 📌 Verificar se a coluna DATA_CRIACAO existe
+    query_check_columns = "PRAGMA table_info(matriculas);"
+    colunas = pd.read_sql(query_check_columns, conn)
+
+    if "DATA_CRIACAO" not in colunas["name"].values:
+        st.error("❌ A coluna 'DATA_CRIACAO' não existe na tabela 'matriculas'.")
+        conn.close()
+        return pd.DataFrame()
+
+    # 📌 Se tudo estiver certo, carregar os dados
     query = "SELECT * FROM matriculas ORDER BY DATA_CRIACAO DESC"
     df = pd.read_sql(query, conn)
     conn.close()
     
     df["DATA_CRIACAO"] = pd.to_datetime(df["DATA_CRIACAO"], errors="coerce", dayfirst=True)
+    df = df.dropna(subset=["DATA_CRIACAO"])  # Remover valores NaT
 
-    # Remover valores NaT para evitar erro na ordenação
-    df = df.dropna(subset=["DATA_CRIACAO"])
     return df
 
 def separar_dias(df, data_hoje, data_ontem):
@@ -160,6 +126,10 @@ st.markdown("""
 
 df = obter_dados()
 
+if df.empty:
+    st.error("❌ Nenhum dado disponível no banco. Aguarde atualizações!")
+    st.stop()
+
 datas_unicas = sorted(df["DATA_CRIACAO"].dropna().dt.date.unique(), reverse=True)
 
 if len(datas_unicas) < 2:
@@ -190,12 +160,5 @@ st.subheader("✏️ Registros Alterados")
 st.dataframe(df_hoje[df_hoje["RA"].isin(alterados)])
 
 st.subheader("📂 Exportar Dados")
-
 if not df_hoje[df_hoje["RA"].isin(adicionados)].empty:
     st.download_button("📥 Baixar Registros Adicionados", data=gerar_download(df_hoje[df_hoje["RA"].isin(adicionados)], "adicionados.xlsx"), file_name="adicionados.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-if not df_ontem[df_ontem["RA"].isin(removidos)].empty:
-    st.download_button("📤 Baixar Registros Removidos", data=gerar_download(df_ontem[df_ontem["RA"].isin(removidos)], "removidos.xlsx"), file_name="removidos.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-if not df_hoje[df_hoje["RA"].isin(alterados)].empty:
-    st.download_button("✏️ Baixar Registros Alterados", data=gerar_download(df_hoje[df_hoje["RA"].isin(alterados)], "alterados.xlsx"), file_name="alterados.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
