@@ -6,7 +6,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from cryptography.fernet import Fernet
 
-# 📢 Função de Log Simples (sem Streamlit)
+# 📢 Função de Log Simples
 def log(mensagem):
     """Escreve logs diretamente no terminal"""
     print(mensagem)
@@ -37,12 +37,11 @@ if os.getenv("GOOGLE_DRIVE_CREDENTIALS"):
     credentials_info = json.loads(os.getenv("GOOGLE_DRIVE_CREDENTIALS"))
 
 # 🔹 2️⃣ Se não encontrar no GitHub Actions, tenta carregar do Streamlit Cloud
-else:
+elif "STREAMLIT_ENV" in os.environ:  # Verifica se estamos no Streamlit Cloud
     try:
         import streamlit as st
-        if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
-            log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
-            credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])
+        log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
+        credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])
     except ImportError:
         pass
 
