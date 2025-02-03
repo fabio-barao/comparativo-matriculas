@@ -1,15 +1,17 @@
-import os
-import streamlit as st
-
-DB_PATH = ".db/matriculas.db"
+import subprocess
 
 st.write("📂 Diretório de trabalho:", os.getcwd())
 st.write("📁 Arquivos no diretório:", os.listdir("."))
 
-if os.path.exists(DB_PATH):
-    st.write("✅ Banco de dados encontrado no Streamlit Cloud!")
-else:
-    st.write("❌ Banco de dados **NÃO encontrado** no Streamlit Cloud!")
+if st.button("🔄 Baixar Banco do Google Drive"):
+    try:
+        result = subprocess.run(["python", "download_db.py"], capture_output=True, text=True, check=True)
+        st.write("✅ Banco de dados baixado com sucesso!")
+        st.text("📜 Saída do script:\n" + result.stdout)
+    except subprocess.CalledProcessError as e:
+        st.error("❌ Erro ao baixar o banco de dados")
+        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
+
 
 
 
