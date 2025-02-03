@@ -1,15 +1,21 @@
 import os
 import streamlit as st
 
-st.write("📂 Diretório onde os bancos devem estar:", os.path.join(os.getcwd(), ".db"))
+DB_DIR = os.path.join(os.getcwd(), ".db")
+DB_NAME = os.path.join(DB_DIR, "matriculas.db")
 
-if os.path.exists(os.path.join(os.getcwd(), ".db")):
-    arquivos_db = os.listdir(os.path.join(os.getcwd(), ".db"))
+# 📂 Criar a pasta, se não existir
+if not os.path.exists(DB_DIR):
+    os.makedirs(DB_DIR, exist_ok=True)
+
+# 📂 Teste de diretório
+st.write("📂 Diretório onde os bancos devem estar:", DB_DIR)
+
+if os.path.exists(DB_DIR):
+    arquivos_db = os.listdir(DB_DIR)
     st.write("📁 Arquivos na pasta .db:", arquivos_db)
 else:
-    st.write("❌ Diretório .db não encontrado!")
-
-
+    st.write("❌ Diretório .db ainda NÃO foi criado!")
 
 
 
