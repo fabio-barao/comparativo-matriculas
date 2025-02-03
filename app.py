@@ -124,6 +124,45 @@ st.markdown("""
     <h1 style='text-align: center;'>📊 Comparação de Matrículas Diário</h1>
 """, unsafe_allow_html=True)
 
+
+
+
+
+
+import sqlite3
+
+st.write("🔍 Diagnóstico do Banco de Dados no Streamlit Cloud")
+
+# 📌 Verificar se o arquivo do banco existe
+if os.path.exists(DB_NAME):
+    st.success(f"✅ Banco de dados encontrado: {DB_NAME}")
+
+    conn = sqlite3.connect(DB_NAME)
+
+    # 📌 Listar tabelas no banco
+    tabelas = pd.read_sql("SELECT name FROM sqlite_master WHERE type='table';", conn)
+    st.write("📋 Tabelas no Banco de Dados:", tabelas)
+
+    # 📌 Verificar se há registros na tabela 'matriculas'
+    try:
+        df_teste = pd.read_sql("SELECT * FROM matriculas LIMIT 5;", conn)
+        st.write("📊 Registros na Tabela 'matriculas':", df_teste.shape[0])
+        st.write("📊 Amostra de Dados:", df_teste)
+    except Exception as e:
+        st.write(f"❌ Erro ao acessar a tabela 'matriculas': {e}")
+
+    conn.close()
+else:
+    st.error("❌ O arquivo do banco de dados não foi encontrado no ambiente do Streamlit Cloud!")
+
+
+
+
+
+
+
+
+
 df = obter_dados()
 
 if df.empty:
