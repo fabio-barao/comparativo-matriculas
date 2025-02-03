@@ -1,4 +1,7 @@
+import os
 import subprocess
+import streamlit as st
+
 
 st.write("📂 Diretório de trabalho:", os.getcwd())
 st.write("📁 Arquivos no diretório:", os.listdir("."))
