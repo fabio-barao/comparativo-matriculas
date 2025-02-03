@@ -28,7 +28,7 @@ try:
     # Streamlit Cloud -> Pegamos as credenciais do secrets.toml
     if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
         log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
-        credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])
+        credentials_info = dict(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])  # Correção aqui
     
     # Ambiente Local -> Usamos credentials.json
     elif os.path.exists("credentials.json"):
@@ -45,6 +45,7 @@ except Exception as e:
     log(f"❌ Erro ao carregar credenciais: {e}")
     log(traceback.format_exc())
     sys.exit(1)
+
 
 
 # 🔐 Autenticação no Google Drive
