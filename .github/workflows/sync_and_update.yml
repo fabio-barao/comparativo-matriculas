@@ -21,16 +21,17 @@ jobs:
       - name: 📦 Instalar dependências
         run: pip install -r requirements.txt
 
-      - name: 🔐 Configurar credenciais do Google Drive
+            - name: 🔐 Configurar credenciais do Google Drive
         env:
           GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
         run: |
-          if [ -z "$GOOGLE_DRIVE_CREDENTIALS" ]; then
-            echo "❌ ERRO: GOOGLE_DRIVE_CREDENTIALS não está definido no ambiente!"
+          echo "${GOOGLE_DRIVE_CREDENTIALS}" | jq '.' > credentials.json
+
+          if [ -z "$(cat credentials.json)" ]; then
+            echo "❌ ERRO: O arquivo credentials.json está vazio ou corrompido!"
             exit 1
           else
-            echo "$GOOGLE_DRIVE_CREDENTIALS" | sed 's/\\n/\n/g' > credentials.json
-            echo "✅ GOOGLE_DRIVE_CREDENTIALS carregado e salvo!"
+            echo "✅ GOOGLE_DRIVE_CREDENTIALS carregado e salvo corretamente!"
           fi
 
       - name: 🔑 Criar chave.key a partir do Secret
