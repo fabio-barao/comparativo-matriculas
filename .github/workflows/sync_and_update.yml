@@ -23,10 +23,19 @@ jobs:
 
       - name: 🔐 Configurar credenciais do Google Drive
         run: |
-          echo "${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}" | sed 's/\\n/\n/g' > credentials.json
+              echo "${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}" | sed 's/\\n/\n/g' > credentials.json
 
       - name: 🔑 Criar chave.key a partir do Secret
         run: echo "${{ secrets.CHAVE_KEY }}" > chave.key
+
+      - name: 🔍 Verificar se GOOGLE_DRIVE_CREDENTIALS está carregado
+        run: |
+          if [ -z "$GOOGLE_DRIVE_CREDENTIALS" ]; then
+            echo "❌ ERRO: GOOGLE_DRIVE_CREDENTIALS não está carregado corretamente!"
+            exit 1
+          else
+            echo "✅ GOOGLE_DRIVE_CREDENTIALS foi carregado com sucesso!"
+          fi
 
       - name: ⬇️ Baixar o banco de dados do Google Drive
         run: python download_db.py
