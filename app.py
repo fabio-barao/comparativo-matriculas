@@ -72,6 +72,32 @@ import os
 import hashlib
 import subprocess
 
+
+
+st.write("🔍 Diagnóstico do Banco de Dados no Streamlit Cloud")
+
+db_dir = os.path.join(os.getcwd(), ".db")
+encrypted_db_path = os.path.join(db_dir, "matriculas_encrypted.db")
+decrypted_db_path = os.path.join(db_dir, "matriculas.db")
+
+# 📂 Verificar se os arquivos existem
+st.write(f"📂 Diretório onde os bancos devem estar: {db_dir}")
+
+if os.path.exists(db_dir):
+    arquivos_db = os.listdir(db_dir)
+    st.write("📁 Arquivos na pasta .db:", arquivos_db)
+else:
+    st.write("❌ Diretório .db não encontrado!")
+
+# 📌 Verificar os arquivos individualmente
+st.write(f"🔍 Banco criptografado encontrado? {'✅ Sim' if os.path.exists(encrypted_db_path) else '❌ Não'}")
+st.write(f"🔍 Banco descriptografado encontrado? {'✅ Sim' if os.path.exists(decrypted_db_path) else '❌ Não'}")
+
+
+
+
+
+
 # 🚀 Configuração do diretório seguro para o banco de dados
 DB_DIR = os.path.join(os.getcwd(), ".db")
 DB_NAME = os.path.join(DB_DIR, "matriculas.db")
