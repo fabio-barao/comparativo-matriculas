@@ -103,3 +103,42 @@ except Exception as e:
     sys.exit(1)
 
 log("✅ `download_db.py` finalizado com sucesso!")
+
+# 🔓 Função para descriptografar o banco de dados
+def descriptografar_banco():
+    try:
+        log("🔓 Tentando descriptografar o banco de dados...")
+
+        # Verificar se a chave existe
+        if not os.path.exists(CHAVE_FILE):
+            log("❌ Arquivo de chave de criptografia não encontrado!")
+            return
+
+        # Ler a chave
+        with open(CHAVE_FILE, "rb") as chave_file:
+            chave = chave_file.read()
+
+        cipher = Fernet(chave)
+
+        # Verificar se o banco criptografado existe
+        if not os.path.exists(ENCRYPTED_DB_PATH):
+            log("❌ Banco criptografado não encontrado!")
+            return
+
+        # Ler o banco criptografado e descriptografar
+        with open(ENCRYPTED_DB_PATH, "rb") as banco_encriptado:
+            dados_encriptados = banco_encriptado.read()
+
+        dados_descriptografados = cipher.decrypt(dados_encriptados)
+
+        # Salvar o banco descriptografado
+        with open(DB_PATH, "wb") as banco:
+            banco.write(dados_descriptografados)
+
+        log(f"✅ Banco de dados descriptografado com sucesso e salvo em {DB_PATH}")
+    except Exception as e:
+        log(f"❌ Erro ao descriptografar o banco de dados: {e}")
+        log(traceback.format_exc())
+
+# 🔓 Rodar a descriptografia após o download
+descriptografar_banco()
