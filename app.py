@@ -1,3 +1,24 @@
+import os
+import streamlit as st
+
+DB_PATH = ".db/matriculas.db"
+
+st.write("📂 Diretório de trabalho:", os.getcwd())
+st.write("📁 Arquivos no diretório:", os.listdir("."))
+
+if os.path.exists(DB_PATH):
+    st.write("✅ Banco de dados encontrado no Streamlit Cloud!")
+else:
+    st.write("❌ Banco de dados **NÃO encontrado** no Streamlit Cloud!")
+
+
+
+
+
+
+
+
+
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -5,8 +26,6 @@ import io
 import os
 import hashlib
 import subprocess
-
-import test_secrets
 
 # 🚀 Configuração do diretório seguro para o banco de dados
 DB_DIR = os.path.join(os.getcwd(), ".db")  # Diretório onde o banco será salvo
