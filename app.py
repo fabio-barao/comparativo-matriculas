@@ -1,6 +1,29 @@
 import subprocess
 import streamlit as st
 
+if st.button("⚙️ Reinstalar Dependências"):
+    try:
+        result = subprocess.run(["pip", "install", "-r", "requirements.txt"], capture_output=True, text=True, check=True)
+        st.write("✅ Dependências reinstaladas com sucesso!")
+        st.text("📜 Saída do script:\n" + result.stdout)
+    except subprocess.CalledProcessError as e:
+        st.error("❌ Erro ao reinstalar dependências")
+        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
+
+
+
+
+
+
+
+
+
+
+
+
+import subprocess
+import streamlit as st
+
 st.write("## 🔄 Atualização Manual do Banco de Dados")
 
 # 🔄 Botão para rodar `download_db.py` manualmente
