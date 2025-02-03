@@ -23,21 +23,29 @@ except Exception as e:
 
 # 🚀 Carregar credenciais do Google Drive corretamente
 try:
-    if "GOOGLE_DRIVE_CREDENTIALS" in os.environ:
+    import streamlit as st
+
+    # Streamlit Cloud -> Pegamos as credenciais do secrets.toml
+    if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
         log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
-        credentials_info = json.loads(os.environ["GOOGLE_DRIVE_CREDENTIALS"])
-    else:
+        credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])
+    
+    # Ambiente Local -> Usamos credentials.json
+    elif os.path.exists("credentials.json"):
         log("🖥️ Rodando no terminal, carregando credenciais do arquivo JSON")
-        if not os.path.exists("credentials.json"):
-            raise FileNotFoundError("Arquivo 'credentials.json' não encontrado no ambiente local!")
         with open("credentials.json") as f:
             credentials_info = json.load(f)
+    
+    # Caso nenhuma credencial seja encontrada
+    else:
+        raise FileNotFoundError("Nenhuma credencial foi encontrada! Verifique `secrets.toml` no Streamlit Cloud ou `credentials.json` no ambiente local.")
 
     log("✅ Credenciais carregadas com sucesso.")
 except Exception as e:
     log(f"❌ Erro ao carregar credenciais: {e}")
     log(traceback.format_exc())
     sys.exit(1)
+
 
 # 🔐 Autenticação no Google Drive
 try:
