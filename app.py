@@ -1,69 +1,3 @@
-import subprocess
-import streamlit as st
-
-if st.button("⚙️ Instalar Dependências"):
-    try:
-        result = subprocess.run(["python", "install_requirements.py"], capture_output=True, text=True, check=True)
-        st.write("✅ Dependências instaladas com sucesso!")
-        st.text("📜 Saída do script:\n" + result.stdout)
-    except subprocess.CalledProcessError as e:
-        st.error("❌ Erro ao instalar dependências")
-        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
-
-
-
-
-
-
-
-import subprocess
-import streamlit as st
-import os
-
-st.write("## 🔍 Diagnóstico do Banco de Dados")
-
-# 📂 Listar arquivos no diretório antes de rodar o script
-if st.button("📂 Verificar Arquivos no Streamlit Cloud"):
-    arquivos = os.listdir(".")
-    st.write("📁 Arquivos no Diretório:", arquivos)
-
-# 🔄 Botão para baixar o banco de dados manualmente
-if st.button("🔄 Baixar Banco de Dados"):
-    try:
-        st.write("📢 Tentando rodar `download_db.py`...")
-
-        # Executar o script e capturar saída e erro
-        result = subprocess.run(
-            ["python", "download_db.py"], 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE, 
-            text=True
-        )
-
-        st.write("📜 Saída do script:")
-        st.text(result.stdout if result.stdout else "⚠️ Nenhuma saída padrão")
-
-        st.write("📜 Erro do script:")
-        st.text(result.stderr if result.stderr else "✅ Nenhum erro detectado")
-
-    except Exception as e:
-        st.error(f"❌ Erro inesperado ao rodar download_db.py: {e}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -71,32 +5,6 @@ import io
 import os
 import hashlib
 import subprocess
-
-
-
-st.write("🔍 Diagnóstico do Banco de Dados no Streamlit Cloud")
-
-db_dir = os.path.join(os.getcwd(), ".db")
-encrypted_db_path = os.path.join(db_dir, "matriculas_encrypted.db")
-decrypted_db_path = os.path.join(db_dir, "matriculas.db")
-
-# 📂 Verificar se os arquivos existem
-st.write(f"📂 Diretório onde os bancos devem estar: {db_dir}")
-
-if os.path.exists(db_dir):
-    arquivos_db = os.listdir(db_dir)
-    st.write("📁 Arquivos na pasta .db:", arquivos_db)
-else:
-    st.write("❌ Diretório .db não encontrado!")
-
-# 📌 Verificar os arquivos individualmente
-st.write(f"🔍 Banco criptografado encontrado? {'✅ Sim' if os.path.exists(encrypted_db_path) else '❌ Não'}")
-st.write(f"🔍 Banco descriptografado encontrado? {'✅ Sim' if os.path.exists(decrypted_db_path) else '❌ Não'}")
-
-
-
-
-
 
 # 🚀 Configuração do diretório seguro para o banco de dados
 DB_DIR = os.path.join(os.getcwd(), ".db")
