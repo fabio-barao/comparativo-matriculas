@@ -21,7 +21,7 @@ jobs:
       - name: 📦 Instalar dependências
         run: pip install -r requirements.txt
 
-            - name: 🔐 Configurar credenciais do Google Drive
+      - name: 🔐 Configurar credenciais do Google Drive
         env:
           GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
         run: |
@@ -43,4 +43,17 @@ jobs:
       - name: 🔍 Verificar se GOOGLE_DRIVE_CREDENTIALS está carregado
         run: |
           if [ -z "$(cat credentials.json)" ]; then
-            echo "❌ ERRO: O arquivo credentials.json está vazi
+            echo "❌ ERRO: O arquivo credentials.json está vazio!"
+            exit 1
+          else
+            echo "✅ O arquivo credentials.json foi criado corretamente!"
+          fi
+
+      - name: ⬇️ Baixar o banco de dados do Google Drive
+        run: python download_db.py
+
+      - name: 🔄 Atualizar os dados no banco
+        run: python atualizar_dados.py
+
+      - name: ⬆️ Fazer upload do banco atualizado para o Google Drive
+        run: python upload_db.py
