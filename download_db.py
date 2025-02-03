@@ -16,21 +16,24 @@ def log(mensagem):
 
 log("🚀 Iniciando download_db.py...")
 
+# 📂 Listar diretório atual e arquivos disponíveis
 try:
-    log("📂 Diretório atual: " + os.getcwd())
-    log("📁 Arquivos no diretório: " + str(os.listdir(".")))
+    log(f"📂 Diretório atual: {os.getcwd()}")
+    log(f"📁 Arquivos no diretório: {os.listdir(os.getcwd())}")
 except Exception as e:
     log(f"❌ Erro ao listar arquivos no diretório: {e}")
     log(traceback.format_exc())
 
 # 🚀 Carregar credenciais do Google Drive corretamente
 try:
-    if "GOOGLE_DRIVE_CREDENTIALS" in os.environ or "streamlit" in sys.modules:
-        import streamlit as st
+    import streamlit as st
+    if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
         log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
         credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])  # Garante que é um dicionário
     else:
         log("🖥️ Rodando no terminal, carregando credenciais do arquivo JSON")
+        if not os.path.exists("credentials.json"):
+            raise FileNotFoundError("Arquivo 'credentials.json' não encontrado no ambiente local!")
         with open("credentials.json") as f:
             credentials_info = json.load(f)
 
