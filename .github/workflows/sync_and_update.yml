@@ -22,7 +22,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: 🔐 Configurar credenciais do Google Drive
-        run: echo '${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}' > credentials.json
+        run: |
+          echo "${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}" | sed 's/\\n/\n/g' > credentials.json
 
       - name: 🔑 Criar chave.key a partir do Secret
         run: echo "${{ secrets.CHAVE_KEY }}" > chave.key
