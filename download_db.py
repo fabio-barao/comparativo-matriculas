@@ -100,3 +100,20 @@ except Exception as e:
     sys.exit(1)
 
 log("✅ `download_db.py` finalizado com sucesso!")
+
+
+log("📂 Verificando se o banco foi baixado e salvo corretamente...")
+
+# 📌 Verificar se o arquivo criptografado foi salvo corretamente
+if os.path.exists(ENCRYPTED_DB_PATH):
+    log(f"✅ Banco criptografado salvo em: {ENCRYPTED_DB_PATH}")
+    log(f"📏 Tamanho do arquivo criptografado: {os.path.getsize(ENCRYPTED_DB_PATH)} bytes")
+else:
+    log(f"❌ Erro: O arquivo {ENCRYPTED_DB_PATH} NÃO foi salvo corretamente!")
+
+# 📌 Verificar se o arquivo descriptografado foi salvo corretamente
+if os.path.exists(DB_PATH):
+    log(f"✅ Banco descriptografado salvo em: {DB_PATH}")
+    log(f"📏 Tamanho do arquivo descriptografado: {os.path.getsize(DB_PATH)} bytes")
+else:
+    log(f"❌ Erro: O arquivo {DB_PATH} NÃO foi salvo corretamente!")
