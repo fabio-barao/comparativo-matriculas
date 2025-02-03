@@ -1,3 +1,36 @@
+import subprocess
+import streamlit as st
+
+st.write("## 🔄 Atualização Manual do Banco de Dados")
+
+# 🔄 Botão para rodar `download_db.py` manualmente
+if st.button("📥 Forçar Download do Banco de Dados"):
+    try:
+        st.write("📢 Tentando rodar `download_db.py`...")
+
+        result = subprocess.run(
+            ["python", "download_db.py"], 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            text=True
+        )
+
+        st.write("📜 Saída do script:")
+        st.text(result.stdout if result.stdout else "⚠️ Nenhuma saída padrão")
+
+        st.write("📜 Erro do script:")
+        st.text(result.stderr if result.stderr else "✅ Nenhum erro detectado")
+
+    except Exception as e:
+        st.error(f"❌ Erro inesperado ao rodar `download_db.py`: {e}")
+
+
+
+
+
+
+
+
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -30,7 +63,7 @@ if not os.path.exists(DB_DIR):
 # 🔄 Função para garantir que o banco de dados esteja disponível
 def verificar_e_baixar_banco():
     if not os.path.exists(DB_NAME):
-        st.warning("📡 Banco de dados não encontrado. Baixando do Google Drive...")
+        st.warning("📡 Banco de dados sendo atualizado, por favor aguarde ...")
         try:
             subprocess.run(["python", "download_db.py"], check=True)
             st.success("✅ Banco de dados baixado e pronto para uso!")
