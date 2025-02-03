@@ -1,3 +1,51 @@
+import subprocess
+import streamlit as st
+import os
+
+st.write("## 🔍 Diagnóstico do Banco de Dados")
+
+# 📂 Listar arquivos no diretório antes de rodar o script
+if st.button("📂 Verificar Arquivos no Streamlit Cloud"):
+    arquivos = os.listdir(".")
+    st.write("📁 Arquivos no Diretório:", arquivos)
+
+# 🔄 Botão para baixar o banco de dados manualmente
+if st.button("🔄 Baixar Banco de Dados"):
+    try:
+        st.write("📢 Tentando rodar `download_db.py`...")
+
+        # Executar o script e capturar saída e erro
+        result = subprocess.run(
+            ["python", "download_db.py"], 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            text=True
+        )
+
+        st.write("📜 Saída do script:")
+        st.text(result.stdout if result.stdout else "⚠️ Nenhuma saída padrão")
+
+        st.write("📜 Erro do script:")
+        st.text(result.stderr if result.stderr else "✅ Nenhum erro detectado")
+
+    except Exception as e:
+        st.error(f"❌ Erro inesperado ao rodar download_db.py: {e}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -123,10 +171,6 @@ def gerar_download(df, nome_arquivo):
 st.markdown("""
     <h1 style='text-align: center;'>📊 Comparação de Matrículas Diário</h1>
 """, unsafe_allow_html=True)
-
-
-
-
 
 
 import sqlite3
