@@ -1,19 +1,3 @@
-import subprocess
-import streamlit as st
-
-if st.button("⚙️ Reinstalar Dependências"):
-    try:
-        result = subprocess.run(["pip", "install", "-r", "requirements.txt"], capture_output=True, text=True, check=True)
-        st.write("✅ Dependências reinstaladas com sucesso!")
-        st.text("📜 Saída do script:\n" + result.stdout)
-    except subprocess.CalledProcessError as e:
-        st.error("❌ Erro ao reinstalar dependências")
-        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
-
-
-
-
-
 import streamlit as st
 import sqlite3
 import pandas as pd
@@ -21,6 +5,19 @@ import io
 import os
 import hashlib
 import subprocess
+
+# 🚀 Garantir que as dependências estejam instaladas antes de qualquer outra coisa
+def instalar_dependencias():
+    """Executa o script de instalação das dependências automaticamente."""
+    try:
+        subprocess.run(["python", "install_requirements.py"], check=True, capture_output=True, text=True)
+        st.success("✅ Dependências instaladas com sucesso!")
+    except subprocess.CalledProcessError as e:
+        st.error("❌ Erro ao instalar dependências. O aplicativo pode não funcionar corretamente!")
+        st.text("📜 Erro:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
+
+# 🚀 Verificar e instalar dependências antes de rodar o app
+instalar_dependencias()
 
 # 🚀 Configuração do diretório seguro para o banco de dados
 DB_DIR = os.path.join(os.getcwd(), ".db")
@@ -35,17 +32,10 @@ def verificar_e_baixar_banco():
     if not os.path.exists(DB_NAME):
         st.warning("📡 Banco de dados não encontrado. Baixando do Google Drive...")
         try:
-            result = subprocess.run(["python", "download_db.py"], capture_output=True, text=True, check=True)
-            st.write("📜 Saída do script:")
-            st.text(result.stdout if result.stdout else "⚠️ Nenhuma saída padrão")
-
-            if os.path.exists(DB_NAME):
-                st.success("✅ Banco de dados baixado e pronto para uso!")
-            else:
-                st.error("❌ Banco não foi encontrado após o download.")
-        except subprocess.CalledProcessError as e:
-            st.error("❌ Erro ao baixar o banco de dados.")
-            st.text(e.stderr if e.stderr else "Nenhuma saída de erro")
+            subprocess.run(["python", "download_db.py"], check=True)
+            st.success("✅ Banco de dados baixado e pronto para uso!")
+        except subprocess.CalledProcessError:
+            st.error("❌ Erro ao baixar o banco de dados. Tente novamente mais tarde.")
 
 # 🔒 Configuração de Login com Hash
 USER_CREDENTIALS = {
