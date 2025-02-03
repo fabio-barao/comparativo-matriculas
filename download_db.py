@@ -53,6 +53,11 @@ except Exception as e:
     log(traceback.format_exc())
     sys.exit(1)
 
+
+log(f"🔍 Variáveis de ambiente disponíveis: {os.environ.keys()}")
+log(f"🔍 GOOGLE_DRIVE_CREDENTIALS detectado? {'GOOGLE_DRIVE_CREDENTIALS' in os.environ}")
+
+
 # 🔐 Autenticação no Google Drive
 try:
     credentials = service_account.Credentials.from_service_account_info(
