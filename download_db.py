@@ -28,6 +28,22 @@ DB_DIR = os.path.join(CURRENT_DIR, ".db")
 ENCRYPTED_DB_PATH = os.path.join(DB_DIR, "matriculas_encrypted.db")
 DB_PATH = os.path.join(DB_DIR, "matriculas.db")
 
+import json
+import os
+
+credentials_info = None
+
+# 🔹 1️⃣ Tenta carregar do ambiente do GitHub Actions
+if os.getenv("GOOGLE_DRIVE_CREDENTIALS"):
+    log("📂 Rodando no GitHub Actions, carregando credenciais do ambiente.")
+    credentials_json = os.getenv("GOOGLE_DRIVE_CREDENTIALS")
+    
+    # ✅ Garante que as quebras de linha sejam restauradas
+    credentials_json = credentials_json.replace("\\n", "\n")
+
+    credentials_info = json.loads(credentials_json)
+
+
 # 🔐 Carregar credenciais do Google Drive
 credentials_info = None
 
