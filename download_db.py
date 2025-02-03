@@ -5,16 +5,11 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from cryptography.fernet import Fernet
 
-# 📌 Verificar se estamos rodando dentro do Streamlit
-try:
-    import streamlit as st
-    USANDO_STREAMLIT = True
-except ImportError:
-    USANDO_STREAMLIT = False  # Rodando no terminal
-
-# 📢 Função para log de mensagens (Streamlit ou print)
+# 📢 Função para log de mensagens
 def log(mensagem):
-    if USANDO_STREAMLIT:
+    """Escreve logs na tela, usando Streamlit se disponível."""
+    if "streamlit" in sys.modules:
+        import streamlit as st
         st.write(mensagem)
     else:
         print(mensagem)
@@ -32,12 +27,12 @@ FILE_NAME = "matriculas_encrypted.db"
 # 📌 Pasta no Google Drive (se houver)
 FOLDER_ID = ""
 
-# 🚀 Teste de acesso ao Streamlit Secrets
+# 🚀 Carregar credenciais do Google Drive
 try:
-    if USANDO_STREAMLIT and "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
+    if "streamlit" in sys.modules:
+        import streamlit as st
         credentials_info = st.secrets["GOOGLE_DRIVE_CREDENTIALS"]
     else:
-        # Caso esteja rodando no terminal, carregar as credenciais do JSON
         with open("credentials.json") as f:
             credentials_info = json.load(f)
 
