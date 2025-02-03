@@ -30,12 +30,9 @@ DB_PATH = os.path.join(DB_DIR, "matriculas.db")
 FILE_NAME = "matriculas_encrypted.db"
 
 # 📌 Pasta no Google Drive (se houver)
-FOLDER_ID = "1gqTrWM72i44so_VXWXoLzG-xOdpoE7Rq"
+FOLDER_ID = ""
 
 # 🚀 Teste de acesso ao Streamlit Secrets
-if USANDO_STREAMLIT:
-    log("🔍 Teste de Credenciais - Streamlit Secrets")
-
 try:
     if USANDO_STREAMLIT and "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
         credentials_info = st.secrets["GOOGLE_DRIVE_CREDENTIALS"]
