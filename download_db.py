@@ -26,37 +26,32 @@ CURRENT_DIR = os.getcwd()
 CHAVE_FILE = os.path.join(CURRENT_DIR, "chave.key")
 DB_DIR = os.path.join(CURRENT_DIR, ".db")
 ENCRYPTED_DB_PATH = os.path.join(DB_DIR, "matriculas_encrypted.db")
-DB_PATH = os.path.join(DB_DIR, "matriculas.db")  # <-- ADICIONADO AQUI
+DB_PATH = os.path.join(DB_DIR, "matriculas.db")
 
-# 🚀 Carregar credenciais do Google Drive corretamente
-try:
-    import streamlit as st
+# 🔐 Carregar credenciais do Google Drive
+credentials_info = None
 
-    # Streamlit Cloud -> Pegamos as credenciais do secrets.toml
-    if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
-        log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
-        credentials_info = dict(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])  # Correção aqui
-    
-    # Ambiente Local -> Usamos credentials.json
-    elif os.path.exists("credentials.json"):
-        log("🖥️ Rodando no terminal, carregando credenciais do arquivo JSON")
-        with open("credentials.json") as f:
-            credentials_info = json.load(f)
-    
-    # Caso nenhuma credencial seja encontrada
-    else:
-        raise FileNotFoundError("Nenhuma credencial foi encontrada! Verifique `secrets.toml` no Streamlit Cloud ou `credentials.json` no ambiente local.")
+# 🔹 1️⃣ Tenta carregar do ambiente do GitHub Actions
+if os.getenv("GOOGLE_DRIVE_CREDENTIALS"):
+    log("📂 Rodando no GitHub Actions, carregando credenciais do ambiente.")
+    credentials_info = json.loads(os.getenv("GOOGLE_DRIVE_CREDENTIALS"))
 
-    log("✅ Credenciais carregadas com sucesso.")
-except Exception as e:
-    log(f"❌ Erro ao carregar credenciais: {e}")
-    log(traceback.format_exc())
+# 🔹 2️⃣ Se não encontrar no GitHub Actions, tenta carregar do Streamlit Cloud
+else:
+    try:
+        import streamlit as st
+        if "GOOGLE_DRIVE_CREDENTIALS" in st.secrets:
+            log("📂 Rodando no Streamlit Cloud, carregando credenciais do secrets.toml")
+            credentials_info = json.loads(st.secrets["GOOGLE_DRIVE_CREDENTIALS"])
+    except ImportError:
+        pass
+
+# 🚨 Se ainda não encontrou, erro crítico
+if credentials_info is None:
+    log("❌ Nenhuma credencial encontrada! Verifique `secrets.toml` no Streamlit Cloud ou `GOOGLE_DRIVE_CREDENTIALS` no GitHub Actions.")
     sys.exit(1)
 
-
-log(f"🔍 Variáveis de ambiente disponíveis: {os.environ.keys()}")
-log(f"🔍 GOOGLE_DRIVE_CREDENTIALS detectado? {'GOOGLE_DRIVE_CREDENTIALS' in os.environ}")
-
+log("✅ Credenciais carregadas com sucesso.")
 
 # 🔐 Autenticação no Google Drive
 try:
@@ -90,7 +85,7 @@ except Exception as e:
     log(traceback.format_exc())
     sys.exit(1)
 
-# 🔽 Baixar o banco de dados
+# 🔽 Baixar o banco de dados criptografado
 try:
     log("📥 Iniciando download do banco de dados...")
     os.makedirs(DB_DIR, exist_ok=True)
