@@ -11,30 +11,36 @@ if st.button("⚙️ Instalar Dependências"):
         st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
 
 
-st.write("## 🔍 Diagnóstico do Banco de Dados")
-
-if st.button("🔄 Rodar download_db.py manualmente"):
-    try:
-        result = subprocess.run(["python", "download_db.py"], capture_output=True, text=True, check=True)
-        st.write("✅ Banco de dados baixado com sucesso!")
-        st.text("📜 Saída do script:\n" + result.stdout)
-    except subprocess.CalledProcessError as e:
-        st.error("❌ Erro ao rodar download_db.py")
-        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
-
 import os
 
-st.write("📂 Diretório de trabalho:", os.getcwd())
-st.write("📁 Arquivos no diretório:", os.listdir("."))
+st.write("## 🔍 Diagnóstico do Banco de Dados")
 
-if st.button("🔄 Baixar Banco do Google Drive"):
+# 📂 Listar arquivos no diretório antes de rodar o script
+if st.button("📂 Verificar Arquivos no Streamlit Cloud"):
+    arquivos = os.listdir(".")
+    st.write("📁 Arquivos no Diretório:", arquivos)
+
+# 🔄 Rodar o script manualmente e capturar a saída
+if st.button("🔄 Rodar download_db.py manualmente"):
     try:
-        result = subprocess.run(["python", "download_db.py"], capture_output=True, text=True, check=True)
-        st.write("✅ Banco de dados baixado com sucesso!")
-        st.text("📜 Saída do script:\n" + result.stdout)
-    except subprocess.CalledProcessError as e:
-        st.error("❌ Erro ao baixar o banco de dados")
-        st.text("📜 Erro Completo:\n" + (e.stderr if e.stderr else "Nenhuma saída"))
+        st.write("📢 Tentando rodar `download_db.py`...")
+        
+        # Executar e capturar saída e erro completo
+        result = subprocess.run(
+            ["python", "download_db.py"], 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            text=True
+        )
+
+        st.write("📜 Saída do script:")
+        st.text(result.stdout if result.stdout else "⚠️ Nenhuma saída padrão")
+
+        st.write("📜 Erro do script:")
+        st.text(result.stderr if result.stderr else "✅ Nenhum erro detectado")
+
+    except Exception as e:
+        st.error(f"❌ Erro inesperado ao rodar download_db.py: {e}")
 
 
 
