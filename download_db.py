@@ -87,6 +87,10 @@ except Exception as e:
 # 🔽 Baixar o banco de dados criptografado
 try:
     log("📥 Iniciando download do banco de dados...")
+
+    log(f"🔍 Variáveis de ambiente disponíveis: {os.environ.keys()}")
+    log(f"🔍 GOOGLE_DRIVE_CREDENTIALS está presente? {'GOOGLE_DRIVE_CREDENTIALS' in os.environ}")
+
     os.makedirs(DB_DIR, exist_ok=True)
 
     request = service.files().get_media(fileId=arquivo_id)
