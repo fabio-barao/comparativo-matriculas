@@ -33,7 +33,13 @@ try:
 
     # 🔹 Restaurando quebras de linha na private_key
     if "private_key" in credentials_info:
-        credentials_info["private_key"] = credentials_info["private_key"].replace("\\n", "\n")
+        credentials_info["private_key"] = credentials_info["private_key"].replace("\\n", "\n").strip()
+
+    # 🔹 Verificando se a chave privada tem formato válido
+    if not credentials_info["private_key"].startswith("-----BEGIN PRIVATE KEY-----") or \
+       not credentials_info["private_key"].endswith("-----END PRIVATE KEY-----"):
+        log("❌ ERRO: A private_key no credentials.json não está no formato esperado!")
+        sys.exit(1)
 
     log("✅ Credenciais carregadas com sucesso do arquivo JSON.")
 

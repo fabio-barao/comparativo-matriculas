@@ -25,15 +25,15 @@ jobs:
         env:
           GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
         run: |
-          echo '${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}' > credentials_raw.json
+          echo "${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}" > credentials_raw.json
 
-          # 🔹 Removendo caracteres de controle que possam quebrar o JSON
+          # 🔹 Removendo caracteres invisíveis e validando JSON
           tr -d '\r' < credentials_raw.json | jq '.' > credentials.json
 
-          # 🔹 Restaurando corretamente as quebras de linha na private_key
+          # 🔹 Convertendo \\n em quebras de linha reais na private_key
           sed -i 's/\\n/\n/g' credentials.json
 
-          # Verificando se o JSON foi salvo corretamente
+          # 🔹 Validando se o JSON final é válido
           if ! jq empty credentials.json; then
             echo "❌ ERRO: O arquivo credentials.json está corrompido!"
             exit 1
